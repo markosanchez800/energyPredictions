@@ -4,7 +4,7 @@ import sklearn as sk
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.ensemble import RandomForestRegressor
 import numpy as np
 from sklearn.metrics import mean_absolute_error
 
@@ -37,11 +37,21 @@ scaler = StandardScaler().fit(X_train)
 Z_train = scaler.transform(X_train)
 Z_test = scaler.transform(X_test)
 
+#Linear Regression Model
 energyLR = LinearRegression()
 energyLR.fit(Z_train,y_train)
 
-predictions1 = energyLR.predict(Z_test)
-print("\nPrediction vs. True")
+#Random Forest (Regression) Model
+energyRF = RandomForestRegressor(n_estimators=100,max_depth=None,random_state=42,n_jobs=-1)
+energyRF.fit(Z_train,y_train)
+
+predictionsLR = energyLR.predict(Z_test)
+predictionsRF = energyRF.predict(Z_test)
+print("\nPrediction vs. True (LR)")
 for i in range(10):
-    print(f"{predictions1[i]} --- {y_test.iloc[i]}")
-print("\nMean Average Error:", mean_absolute_error(y_test,predictions1))
+    print(f"{predictionsLR[i]} --- {y_test.iloc[i]}")
+print("\nPrediction vs. True (RF)")
+for i in range(10):
+    print(f"{predictionsRF[i]} --- {y_test.iloc[i]}")
+print("\nMean Absolute Error (LR):", mean_absolute_error(y_test,predictionsLR))
+print("\nMean Absolute Error (RF):", mean_absolute_error(y_test,predictionsRF))
