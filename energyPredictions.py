@@ -2,12 +2,11 @@ from ucimlrepo import fetch_ucirepo
 import pandas as pd
 import sklearn as sk
 from sklearn.model_selection import train_test_split
-from sklearn.dummy import DummyRegressor
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestRegressor
 import numpy as np
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 
 # fetch dataset, clean date/time into workable data, and drop NA values
 individual_household_electric_power_consumption = fetch_ucirepo(id=235)
@@ -58,15 +57,45 @@ energyRF.fit(Z_train,y_train)
 
 predictionsLR = energyLR.predict(Z_test)
 predictionsRF = energyRF.predict(Z_test)
+alphaRidge = 500
+ridge = Ridge(alpha=alphaRidge).fit(Z_train,y_train)
+predictionsRidge = ridge.predict(Z_test)
+
 print("\nPrediction vs. True (LR)")
 for i in range(10):
     print(f"{predictionsLR[i]} --- {y_test.iloc[i]}")
 print("\nPrediction vs. True (RF)")
 for i in range(10):
     print(f"{predictionsRF[i]} --- {y_test.iloc[i]}")
-print("\nMean Absolute Error (Naive Persistence):", mean_absolute_error(y_test,naivePersist))
-print("\nMean Absolute Error (Naive Daily):", mean_absolute_error(y_test,naiveDaily))
-print("\nMean Absolute Error (LR):", mean_absolute_error(y_test,predictionsLR))
-print("\nMean Absolute Error (RF):", mean_absolute_error(y_test,predictionsRF))
 
-# NEED TO IMPLEMENT RIDGE OR LASSO FOR LR
+print('Model Comparisons')
+print("-" * 20)
+print("Naive Persistence (Minute by Minute)")
+print("-" * 20)
+print("\nMean Absolute Error (Naive Persistence):", mean_absolute_error(y_test,naivePersist))
+print("\nRMSE (Naive Persistence):", np.sqrt(mean_squared_error(y_test,naivePersist)))
+print("\nR2 Score (Naive Persistence):", r2_score(y_test,naivePersist))
+print("-" * 20)
+print("Naive Daily (Day by Day)")
+print("-" * 20)
+print("\nMean Absolute Error (Naive Daily):", mean_absolute_error(y_test,naiveDaily))
+print("\nRMSE (Naive Daily):", np.sqrt(mean_squared_error(y_test,naiveDaily)))
+print("\nR2 Score (Naive Daily):", r2_score(y_test,naiveDaily))
+print("-" * 20)
+print("Linear Regression")
+print("-" * 20)
+print("\nMean Absolute Error (LR):", mean_absolute_error(y_test,predictionsLR))
+print("\nRMSE (LR):", np.sqrt(mean_squared_error(y_test,predictionsLR)))
+print("\nR2 Score (LR):", r2_score(y_test,predictionsLR))
+print("-" * 20)
+print("Random Forest (Regression)")
+print("-" * 20)
+print("\nMean Absolute Error (RF):", mean_absolute_error(y_test,predictionsRF))
+print("\nRMSE (RF):", np.sqrt(mean_squared_error(y_test,predictionsRF)))
+print("\nR2 Score (RF):", r2_score(y_test,predictionsRF))
+print("-" * 20)
+print("Ridge")
+print("-" * 20)
+print("\nMean Absolute Error (Ridge):", mean_absolute_error(y_test,predictionsRidge))
+print("\nRMSE (Ridge):", np.sqrt(mean_squared_error(y_test,predictionsRidge)))
+print("\nR2 Score (Ridge):", r2_score(y_test,predictionsRidge))
